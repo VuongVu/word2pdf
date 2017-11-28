@@ -15,6 +15,7 @@ Example
 
 ```javascript
 const word2pdf = require('word2pdf');
+const fs = require('fs');
 
 word2pdf('test.docx', (err, data) => {
   if (err) {
