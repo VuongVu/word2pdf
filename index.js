@@ -1,5 +1,22 @@
 const request = require("request");
 const fs = require("fs");
+const cheerio = require("cheerio");
+
+const homepage = async () => {
+  const html = await new Promise((resolve, reject) => {
+    const req = request.get("https://convertonlinefree.com", {}, (err, res) => {
+      if (err) return reject(err);
+      resolve(res.body);
+    });
+  });
+  const $ = cheerio.load(html);
+  return {
+    __VIEWSTATE: $("#__VIEWSTATE").attr("value"),
+    __VIEWSTATEGENERATOR: $("#__VIEWSTATEGENERATOR").attr("value"),
+    __EVENTVALIDATION: $("#__EVENTVALIDATION").attr("value"),
+    hfConversionID: $("#hfConversionID").attr("value"),
+  };
+};
 
 const word2pdf = async (path) => {
   const buffer = await new Promise((resolve, reject) => {
@@ -11,6 +28,8 @@ const word2pdf = async (path) => {
       }
     });
   });
+
+  const hiddens = await homepage();
 
   const data = await new Promise((resolve, reject) => {
     const req = request.post(
@@ -30,7 +49,11 @@ const word2pdf = async (path) => {
     const form = req.form();
     form.append("__EVENTTARGET", "");
     form.append("__EVENTARGUMENT", "");
-    form.append("__VIEWSTATE", "");
+    form.append("__VIEWSTATEENCRYPTED", "");
+    form.append("__VIEWSTATE", hiddens.__VIEWSTATE);
+    form.append("__VIEWSTATEGENERATOR", hiddens.__VIEWSTATEGENERATOR);
+    form.append("__EVENTVALIDATION", hiddens.__EVENTVALIDATION);
+    form.append("ctl00$hfConversionID", hiddens.hfConversionID);
     form.append("ctl00$MainContent$fu", buffer, {
       filename: "output.docx",
       contentType:
