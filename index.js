@@ -2,32 +2,36 @@ const request = require("request");
 const fs = require("fs");
 const cheerio = require("cheerio");
 
-const homepage = async () => {
-  const html = await new Promise((resolve, reject) => {
-    const req = request.get(
-      "https://convertonlinefree.com",
-      {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.94 Safari/537.36",
-        },
-      },
-      (err, res) => {
-        if (err) return reject(err);
-        resolve(res.body);
-      }
-    );
-  });
-  const $ = cheerio.load(html);
-  return {
-    __VIEWSTATE: $("#__VIEWSTATE").attr("value"),
-    __VIEWSTATEGENERATOR: $("#__VIEWSTATEGENERATOR").attr("value"),
-    __EVENTVALIDATION: $("#__EVENTVALIDATION").attr("value"),
-    hfConversionID: $("#hfConversionID").attr("value"),
-  };
-};
-
 const word2pdf = async (path) => {
+  const homepage = async () => {
+    const jar = request.jar();
+    const html = await new Promise((resolve, reject) => {
+      const req = request(
+        {
+          url: "https://convertonlinefree.com",
+          method: "GET",
+          jar: jar,
+          headers: {
+            "User-Agent":
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.94 Safari/537.36",
+          },
+        },
+        (err, res) => {
+          if (err) return reject(err);
+          resolve(res.body);
+        }
+      );
+    });
+    const $ = cheerio.load(html);
+    return {
+      __VIEWSTATE: $("#__VIEWSTATE").attr("value"),
+      __VIEWSTATEGENERATOR: $("#__VIEWSTATEGENERATOR").attr("value"),
+      __EVENTVALIDATION: $("#__EVENTVALIDATION").attr("value"),
+      hfConversionID: $("#hfConversionID").attr("value"),
+      jar,
+    };
+  };
+
   const buffer = await new Promise((resolve, reject) => {
     fs.readFile(path, (err, data) => {
       if (err) {
@@ -41,15 +45,12 @@ const word2pdf = async (path) => {
   const hiddens = await homepage();
 
   const data = await new Promise((resolve, reject) => {
-    const jar = request.jar();
-    const cookie = request.cookie(`ConversionID=${hiddens.hfConversionID}`);
-    jar.setCookie(cookie, "https://convertonlinefree.com");
     const req = request(
       {
         url: "https://convertonlinefree.com",
         method: "POST",
-        jar: jar,
         encoding: null,
+        jar: hiddens.jar,
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.94 Safari/537.36",
