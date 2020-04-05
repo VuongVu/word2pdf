@@ -4,10 +4,19 @@ const cheerio = require("cheerio");
 
 const homepage = async () => {
   const html = await new Promise((resolve, reject) => {
-    const req = request.get("https://convertonlinefree.com", {}, (err, res) => {
-      if (err) return reject(err);
-      resolve(res.body);
-    });
+    const req = request.get(
+      "https://convertonlinefree.com",
+      {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.94 Safari/537.36",
+        },
+      },
+      (err, res) => {
+        if (err) return reject(err);
+        resolve(res.body);
+      }
+    );
   });
   const $ = cheerio.load(html);
   return {
