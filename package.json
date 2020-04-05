@@ -1,6 +1,6 @@
 {
   "name": "word2pdf",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Convert doc, docx to pdf",
   "main": "index.js",
   "author": "Vuong Vu <vuongvu333@gmail.com>",
@@ -8,6 +8,6 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "request": "^2.88.0"
+    "request": "^2.88.2"
   }
 }
