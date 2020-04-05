@@ -41,9 +41,14 @@ const word2pdf = async (path) => {
   const hiddens = await homepage();
 
   const data = await new Promise((resolve, reject) => {
-    const req = request.post(
-      "https://convertonlinefree.com",
+    const jar = request.jar();
+    const cookie = request.cookie(`ConversionID=${hiddens.hfConversionID}`);
+    jar.setCookie(cookie, "https://convertonlinefree.com");
+    const req = request(
       {
+        url: "https://convertonlinefree.com",
+        method: "POST",
+        jar: jar,
         encoding: null,
         headers: {
           "User-Agent":
