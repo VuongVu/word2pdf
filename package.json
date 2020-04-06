@@ -1,6 +1,6 @@
 {
   "name": "word2pdf",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Convert doc, docx to pdf",
   "main": "index.js",
   "author": "Vuong Vu <vuongvu333@gmail.com>",
